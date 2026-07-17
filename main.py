@@ -2,403 +2,400 @@
 # -*- coding: utf-8 -*-
 
 """
-اپلیکیشن شبیه‌ساز کنکور سراسری
-برنامه اصلی با رابط کاربری گرافیکی
+Konkoor Simulator Application
+Main program with graphical user interface
 """
 
 import tkinter as tk
 from tkinter import messagebox, ttk
 import time
-from quiz_engine import مدیریت_کوییز
-from questions import گرفتن_درس‌ها
+from quiz_engine import QuizManager
+from questions import get_subjects
 
-class صفحه_اصلی:
+class MainApp:
     def __init__(self, root):
         self.root = root
         self.root.title("شبیه‌ساز کنکور سراسری")
         self.root.geometry("700x500")
         self.root.configure(bg="#f0f0f0")
         
-        # تعیین فونت RTL
-        self.فونت_عنوان = ("Arial", 20, "bold")
-        self.فونت_عادی = ("Arial", 12)
-        self.فونت_کوچک = ("Arial", 10)
+        # Set fonts
+        self.font_title = ("Arial", 20, "bold")
+        self.font_normal = ("Arial", 12)
+        self.font_small = ("Arial", 10)
         
-        self.مدیریت_کوییز = مدیریت_کوییز()
-        self.درس_انتخابی = None
+        self.quiz_manager = QuizManager()
+        self.selected_subject = None
         
-        self._ایجاد_صفحه_اصلی()
+        self._create_main_page()
     
-    def _ایجاد_صفحه_اصلی(self):
-        """ایجاد صفحه اصلی"""
-        # پاک کردن صفحه
+    def _create_main_page(self):
+        """Create main page"""
+        # Clear page
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        # قسمت بالایی - عنوان
-        فریم_عنوان = tk.Frame(self.root, bg="#1e3a8a", height=100)
-        فریم_عنوان.pack(fill=tk.X)
+        # Top section - title
+        top_frame = tk.Frame(self.root, bg="#1e3a8a", height=100)
+        top_frame.pack(fill=tk.X)
         
-        لیبل_عنوان = tk.Label(
-            فریم_عنوان,
+        title_label = tk.Label(
+            top_frame,
             text="🎓 شبیه‌ساز کنکور سراسری",
-            font=self.فونت_عنوان,
+            font=self.font_title,
             bg="#1e3a8a",
             fg="white"
         )
-        لیبل_عنوان.pack(pady=20)
+        title_label.pack(pady=20)
         
-        # قسمت اصلی
-        فریم_محتوا = tk.Frame(self.root, bg="#f0f0f0")
-        فریم_محتوا.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Main content section
+        main_frame = tk.Frame(self.root, bg="#f0f0f0")
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # پیام خوش‌آمدگویی
-        پیام = tk.Label(
-            فریم_محتوا,
+        # Welcome message
+        message = tk.Label(
+            main_frame,
             text="خوش‌آمدید به شبیه‌ساز کنکور سراسری!\nیک درس را انتخاب کنید:",
-            font=self.فونت_عادی,
+            font=self.font_normal,
             bg="#f0f0f0",
             justify=tk.CENTER
         )
-        پیام.pack(pady=20)
+        message.pack(pady=20)
         
-        # لیست درس‌ها
-        درس‌ها = گرفتن_درس‌ها()
+        # Subject list
+        subjects = get_subjects()
         
-        for درس in درس‌ها:
-            دکمه = tk.Button(
-                فریم_محتوا,
-                text=f"📚 {درس}",
-                font=self.فونت_عادی,
+        for subject in subjects:
+            btn = tk.Button(
+                main_frame,
+                text=f"📚 {subject}",
+                font=self.font_normal,
                 bg="#3b82f6",
                 fg="white",
                 padx=20,
                 pady=10,
                 width=30,
-                command=lambda d=درس: self._شروع_کوییز(d)
+                command=lambda s=subject: self._start_quiz(s)
             )
-            دکمه.pack(pady=8)
+            btn.pack(pady=8)
         
-        # قسمت پایین - تاریخچه
-        دکمه_تاریخچه = tk.Button(
-            فریم_محتوا,
+        # Bottom section - history
+        history_btn = tk.Button(
+            main_frame,
             text="📊 مشاهده تاریخچه",
-            font=self.فونت_کوچک,
+            font=self.font_small,
             bg="#10b981",
             fg="white",
-            command=self._نمایش_تاریخچه
+            command=self._show_history
         )
-        دکمه_تاریخچه.pack(pady=10)
+        history_btn.pack(pady=10)
     
-    def _شروع_کوییز(self, درس):
-        """شروع کوییز برای درس انتخاب شده"""
-        self.درس_انتخابی = درس
+    def _start_quiz(self, subject):
+        """Start quiz for selected subject"""
+        self.selected_subject = subject
         
-        # پنجره انتخاب تعداد سوالات
-        پنجره_تنظیمات = tk.Toplevel(self.root)
-        پنجره_تنظیمات.title("تنظیمات کوییز")
-        پنجره_تنظیمات.geometry("300x200")
+        # Settings window
+        settings_window = tk.Toplevel(self.root)
+        settings_window.title("تنظیمات کوییز")
+        settings_window.geometry("300x200")
         
         tk.Label(
-            پنجره_تنظیمات,
-            text=f"درس: {درس}",
-            font=self.فونت_عادی
+            settings_window,
+            text=f"درس: {subject}",
+            font=self.font_normal
         ).pack(pady=10)
         
         tk.Label(
-            پنجره_تنظیمات,
+            settings_window,
             text="تعداد سوالات:",
-            font=self.فونت_عادی
+            font=self.font_normal
         ).pack(pady=5)
         
-        تعداد = ttk.Spinbox(
-            پنجره_تنظیمات,
+        num_questions = ttk.Spinbox(
+            settings_window,
             from_=1,
             to=10,
             width=10,
-            font=self.فونت_عادی
+            font=self.font_normal
         )
-        تعداد.set(5)
-        تعداد.pack(pady=5)
+        num_questions.set(5)
+        num_questions.pack(pady=5)
         
-        def شروع():
+        def start():
             try:
-                تعداد_سوال = int(تعداد.get())
-                if self.مدیریت_کوییز.شروع_کوییز_جدید(درس, تعداد_سوال):
-                    پنجره_تنظیمات.destroy()
-                    self._نمایش_صفحه_کوییز()
+                num = int(num_questions.get())
+                if self.quiz_manager.start_new_quiz(subject, num):
+                    settings_window.destroy()
+                    self._show_quiz_page()
                 else:
                     messagebox.showerror("خطا", "خطای نامشخص!")
             except ValueError:
                 messagebox.showerror("خطا", "لطفاً عدد صحیح وارد کنید!")
         
-        دکمه_شروع = tk.Button(
-            پنجره_تنظیمات,
+        start_btn = tk.Button(
+            settings_window,
             text="شروع کوییز",
-            font=self.فونت_عادی,
+            font=self.font_normal,
             bg="#3b82f6",
             fg="white",
-            command=شروع
+            command=start
         )
-        دکمه_شروع.pack(pady=20)
+        start_btn.pack(pady=20)
     
-    def _نمایش_صفحه_کوییز(self):
-        """نمایش صفحه کوییز"""
+    def _show_quiz_page(self):
+        """Show quiz page"""
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        کوییز_فعلی = self.مدیریت_کوییز.گرفتن_کوییز_فعلی()
+        current_quiz = self.quiz_manager.get_current_quiz()
         
-        if not کوییز_فعلی:
+        if not current_quiz:
             messagebox.showerror("خطا", "خطا در بارگذاری کوییز")
             return
         
-        # قسمت بالایی - اطلاعات
-        فریم_اطلاعات = tk.Frame(self.root, bg="#1e3a8a")
-        فریم_اطلاعات.pack(fill=tk.X)
+        # Top section - information
+        info_frame = tk.Frame(self.root, bg="#1e3a8a")
+        info_frame.pack(fill=tk.X)
         
-        اطلاعات_متن = f"درس: {کوییز_فعلی.درس} | سوال {کوییز_فعلی.شماره_سوال_فعلی + 1} از {len(کوییز_فعلی.سوالات)}"
+        info_text = f"درس: {current_quiz.subject} | سوال {current_quiz.current_question_index + 1} از {len(current_quiz.questions)}"
         
-        لیبل_اطلاعات = tk.Label(
-            فریم_اطلاعات,
-            text=اطلاعات_متن,
-            font=self.فونت_عادی,
+        info_label = tk.Label(
+            info_frame,
+            text=info_text,
+            font=self.font_normal,
             bg="#1e3a8a",
             fg="white"
         )
-        لیبل_اطلاعات.pack(pady=10)
+        info_label.pack(pady=10)
         
-        # قسمت اصلی - سوال و گزینه‌ها
-        فریم_محتوا = tk.Frame(self.root, bg="#f0f0f0")
-        فریم_محتوا.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Main section - question and options
+        main_frame = tk.Frame(self.root, bg="#f0f0f0")
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        سوال_فعلی = کوییز_فعلی.گرفتن_سوال_فعلی()
+        current_question = current_quiz.get_current_question()
         
-        if not سوال_فعلی:
-            self._نمایش_نتایج()
+        if not current_question:
+            self._show_results()
             return
         
-        # نمایش سوال
-        لیبل_سوال = tk.Label(
-            فریم_محتوا,
-            text=سوال_فعلی['سوال'],
-            font=self.فونت_عادی,
+        # Display question
+        question_label = tk.Label(
+            main_frame,
+            text=current_question['question'],
+            font=self.font_normal,
             bg="#f0f0f0",
             wraplength=600,
             justify=tk.CENTER
         )
-        لیبل_سوال.pack(pady=20)
+        question_label.pack(pady=20)
         
-        # متغیر برای ذخیره انتخاب
-        انتخاب = tk.IntVar()
+        # Variable to store selection
+        choice = tk.IntVar()
         
-        # نمایش گزینه‌ها
-        for i, گزینه in enumerate(سوال_فعلی['گزینه‌ها']):
-            رادیو = tk.Radiobutton(
-                فریم_محتوا,
-                text=گزینه,
-                variable=انتخاب,
+        # Display options
+        for i, option in enumerate(current_question['options']):
+            radio = tk.Radiobutton(
+                main_frame,
+                text=option,
+                variable=choice,
                 value=i,
-                font=self.فونت_عادی,
+                font=self.font_normal,
                 bg="#f0f0f0"
             )
-            رادیو.pack(pady=8, anchor=tk.E)
+            radio.pack(pady=8, anchor=tk.E)
         
-        # دکمه بعدی
-        def انتقال_به_بعدی():
-            کوییز_فعلی.ثبت_پاسخ(انتخاب.get())
+        # Next button
+        def next_question():
+            current_quiz.submit_answer(choice.get())
             
-            if کوییز_فعلی.آیا_کوییز_تمام_شده():
-                self._نمایش_نتایج()
+            if current_quiz.is_completed():
+                self._show_results()
             else:
-                self._نمایش_صفحه_کوییز()
+                self._show_quiz_page()
         
-        دکمه_بعدی = tk.Button(
-            فریم_محتوا,
+        next_btn = tk.Button(
+            main_frame,
             text="→ بعدی",
-            font=self.فونت_عادی,
+            font=self.font_normal,
             bg="#10b981",
             fg="white",
             padx=20,
             pady=10,
-            command=انتقال_به_بعدی
+            command=next_question
         )
-        دکمه_بعدی.pack(pady=20)
+        next_btn.pack(pady=20)
     
-    def _نمایش_نتایج(self):
-        """نمایش صفحه نتایج"""
+    def _show_results(self):
+        """Show results page"""
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        کوییز_فعلی = self.مدیریت_کوییز.گرفتن_کوییز_فعلی()
-        گزارش = کوییز_فعلی.گرفتن_گزارش()
+        current_quiz = self.quiz_manager.get_current_quiz()
+        report = current_quiz.get_report()
         
-        # قسمت بالایی
-        فریم_بالایی = tk.Frame(self.root, bg="#1e3a8a")
-        فریم_بالایی.pack(fill=tk.X)
+        # Top section
+        top_frame = tk.Frame(self.root, bg="#1e3a8a")
+        top_frame.pack(fill=tk.X)
         
-        لیبل_عنوان = tk.Label(
-            فریم_بالایی,
+        title_label = tk.Label(
+            top_frame,
             text="🏆 نتایج کوییز",
-            font=self.فونت_عنوان,
+            font=self.font_title,
             bg="#1e3a8a",
             fg="white"
         )
-        لیبل_عنوان.pack(pady=20)
+        title_label.pack(pady=20)
         
-        # قسمت اصلی
-        فریم_محتوا = tk.Frame(self.root, bg="#f0f0f0")
-        فریم_محتوا.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Main section
+        main_frame = tk.Frame(self.root, bg="#f0f0f0")
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # اطلاعات نتایج
-        نتایج_متن = f"""
-درس: {گزارش['درس']}
-تعداد سوالات: {گزارش['تعداد_سوالات']}
-امتیاز: {گزارش['امتیاز']}/{گزارش['تعداد_سوالات']}
-درصد: {گزارش['درصد']:.1f}%
-رتبه‌بندی: {کوییز_فعلی.تعیین_گریدز()}
+        # Results information
+        results_text = f"""
+درس: {report['subject']}
+تعداد سوالات: {report['total_questions']}
+امتیاز: {report['score']}/{report['total_questions']}
+درصد: {report['percentage']:.1f}%
+رتبه‌بندی: {current_quiz.get_grade()}
         """
         
-        لیبل_نتایج = tk.Label(
-            فریم_محتوا,
-            text=نتایج_متن,
-            font=self.فونت_عادی,
+        results_label = tk.Label(
+            main_frame,
+            text=results_text,
+            font=self.font_normal,
             bg="#f0f0f0",
             justify=tk.CENTER
         )
-        لیبل_نتایج.pack(pady=20)
+        results_label.pack(pady=20)
         
-        # دکمه مشاهده تفاصیل
-        دکمه_تفاصیل = tk.Button(
-            فریم_محتوا,
+        # Details button
+        details_btn = tk.Button(
+            main_frame,
             text="📋 مشاهده تفاصیل",
-            font=self.فونت_عادی,
+            font=self.font_normal,
             bg="#3b82f6",
             fg="white",
-            command=lambda: self._نمایش_تفاصیل_نتایج(گزارش)
+            command=lambda: self._show_details(report)
         )
-        دکمه_تفاصیل.pack(pady=10)
+        details_btn.pack(pady=10)
         
-        # دکمه برگشت
-        دکمه_برگشت = tk.Button(
-            فریم_محتوا,
+        # Back button
+        back_btn = tk.Button(
+            main_frame,
             text="🏠 برگشت به صفحه اصلی",
-            font=self.فونت_عادی,
+            font=self.font_normal,
             bg="#10b981",
             fg="white",
-            command=self._بازگشت_به_صفحه_اصلی
+            command=self._back_to_main
         )
-        دکمه_برگشت.pack(pady=10)
+        back_btn.pack(pady=10)
         
-        # ثبت نتیجه در تاریخچه
-        self.مدیریت_کوییز.ثبت_نتیجه_نهایی()
+        # Save result to history
+        self.quiz_manager.save_result()
     
-    def _نمایش_تفاصیل_نتایج(self, گزارش):
-        """نمایش تفاصیل پاسخ‌ها"""
-        پنجره_تفاصیل = tk.Toplevel(self.root)
-        پنجره_تفاصیل.title("تفاصیل نتایج")
-        پنجره_تفاصیل.geometry("600x500")
+    def _show_details(self, report):
+        """Show answer details"""
+        details_window = tk.Toplevel(self.root)
+        details_window.title("تفاصیل نتایج")
+        details_window.geometry("600x500")
         
-        # ایجاد Scrollbar
-        canvas = tk.Canvas(پنجره_تفاصیل)
-        scrollbar = ttk.Scrollbar(پنجره_تفاصیل, orient="vertical", command=canvas.yview)
-        فریم_قابل_اسکرول = tk.Frame(canvas)
+        # Create Scrollbar
+        canvas = tk.Canvas(details_window)
+        scrollbar = ttk.Scrollbar(details_window, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas)
         
-        فریم_قابل_اسکرول.bind(
+        scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
         
-        canvas.create_window((0, 0), window=فریم_قابل_اسکرول, anchor="nw")
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
         
-        # نمایش هر پاسخ
-        for پاسخ in گزارش['پاسخ‌ها']:
-            وضعیت = "✅ درست" if پاسخ['درست'] else "❌ اشتباه"
+        # Display each answer
+        for answer in report['answers']:
+            status = "✅ درست" if answer['is_correct'] else "❌ اشتباه"
             
-            متن_پاسخ = f"""
-سوال {پاسخ['شماره']}: {وضعیت}
-{پاسخ['سوال']}
+            answer_text = f"""
+سوال {answer['number']}: {status}
+{answer['question']}
 
-گزینه انتخاب شده: {پاسخ['پاسخ_انتخاب_شده'] + 1}
-پاسخ صحیح: {پاسخ['پاسخ_صحیح'] + 1}
+گزینه انتخاب شده: {answer['user_choice'] + 1}
+پاسخ صحیح: {answer['correct_choice'] + 1}
             """
             
-            لیبل = tk.Label(
-                فریم_قابل_اسکرول,
-                text=متن_پاسخ,
-                font=self.فونت_کوچک,
+            label = tk.Label(
+                scrollable_frame,
+                text=answer_text,
+                font=self.font_small,
                 bg="#f0f0f0",
                 justify=tk.RIGHT,
                 padx=10,
                 pady=10
             )
-            لیبل.pack(fill=tk.X, padx=5, pady=5)
+            label.pack(fill=tk.X, padx=5, pady=5)
         
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
     
-    def _نمایش_تاریخچه(self):
-        """نمایش تاریخچه کوییزها"""
-        تاریخچه = self.مدیریت_کوییز.گرفتن_تاریخچه()
+    def _show_history(self):
+        """Show quiz history"""
+        history = self.quiz_manager.get_history()
         
-        if not تاریخچه:
+        if not history:
             messagebox.showinfo("تاریخچه", "تاریخچه خالی است!\nاول یک کوییز شروع کنید.")
             return
         
-        پنجره_تاریخچه = tk.Toplevel(self.root)
-        پنجره_تاریخچه.title("تاریخچه کوییزها")
-        پنجره_تاریخچه.geometry("500x400")
+        history_window = tk.Toplevel(self.root)
+        history_window.title("تاریخچه کوییزها")
+        history_window.geometry("500x400")
         
-        # ایجاد Scrollbar
-        canvas = tk.Canvas(پنجره_تاریخچه)
-        scrollbar = ttk.Scrollbar(پنجره_تاریخچه, orient="vertical", command=canvas.yview)
-        فریم_قابل_اسکرول = tk.Frame(canvas)
+        # Create Scrollbar
+        canvas = tk.Canvas(history_window)
+        scrollbar = ttk.Scrollbar(history_window, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas)
         
-        فریم_قابل_اسکرول.bind(
+        scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
         
-        canvas.create_window((0, 0), window=فریم_قابل_اسکرول, anchor="nw")
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
         
-        # نمایش هر کوییز
-        for i, نتیجه in enumerate(تاریخچه, 1):
-            متن = f"""
+        # Display each quiz
+        for i, result in enumerate(history, 1):
+            text = f"""
 کوییز {i}:
-درس: {نتیجه['درس']}
-امتیاز: {نتیجه['امتیاز']}/{نتیجه['تعداد_سوالات']}
-درصد: {نتیجه['درصد']:.1f}%
+درس: {result['subject']}
+امتیاز: {result['score']}/{result['total_questions']}
+درصد: {result['percentage']:.1f}%
             """
             
-            لیبل = tk.Label(
-                فریم_قابل_اسکرول,
-                text=متن,
-                font=self.فونت_کوچک,
+            label = tk.Label(
+                scrollable_frame,
+                text=text,
+                font=self.font_small,
                 bg="#f0f0f0",
                 justify=tk.RIGHT
             )
-            لیبل.pack(fill=tk.X, padx=5, pady=5)
+            label.pack(fill=tk.X, padx=5, pady=5)
         
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
     
-    def _بازگشت_به_صفحه_اصلی(self):
-        """بازگشت به صفحه اصلی"""
-        self._ایجاد_صفحه_اصلی()
+    def _back_to_main(self):
+        """Back to main page"""
+        self._create_main_page()
 
 def main():
-    """تابع اصلی برنامه"""
+    """Main function"""
     root = tk.Tk()
     
-    # تنظیم RTL
-    root.tk.call('tk', 'scaling', 2.0)
-    
-    # تنظیم رنگ‌های پیش‌فرض
+    # Set default colors
     root.configure(bg="#f0f0f0")
     
-    app = صفحه_اصلی(root)
+    app = MainApp(root)
     root.mainloop()
 
 if __name__ == "__main__":

@@ -8,9 +8,6 @@ Modern GUI with RTL support
 
 import tkinter as tk
 from tkinter import messagebox, ttk
-from PIL import Image, ImageDraw, ImageFont
-import io
-import base64
 from quiz_engine import QuizManager
 from questions import get_subjects
 
